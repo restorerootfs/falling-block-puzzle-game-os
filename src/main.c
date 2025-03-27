@@ -17,13 +17,12 @@
 
 #define TILE_SIZE 10
 
-#define LOGO_HEIGHT 5
+#define LOGO_HEIGHT 4
 static const char *LOGO[LOGO_HEIGHT] = {
-    "AAA BBB CCC DD  EEE FFF",
-    " A  B    C  D D  E  F  ",
-    " A  BBB  C  DD   E  FFF",
-    " A  B    C  D D  E    F",
-    " A  BBB  C  D D EEE FFF",
+    "  ___ _   _    _    ___ _  _  ___   ___ _    ___   ___ _  __  ___ _   _ _________    ___    ___   _   __  __ ___",
+    " | __/_\ | |  | |  |_ _| \| |/ __| | _ ) |  / _ \ / __| |/ / | _ \ | | |_  /_  / |  | __|  / __| /_\ |  \/  | __|",
+    " | _/ _ \| |__| |__ | || .` | (_ | | _ \ |_| (_) | (__| ' <  |  _/ |_| |/ / / /| |__| _|  | (_ |/ _ \| |\/| | _| ",
+    " |_/_/ \_\____|____|___|_|\_|\___| |___/____\___/ \___|_|\_\ |_|  \___//___/___|____|___|  \___/_/ \_\_|  |_|___|",
 };
 
 #define NUM_TILES (BORDER + 1)
@@ -94,13 +93,13 @@ u8 TILE_SPRITES[NUM_TILES][TILE_SIZE * TILE_SIZE] = { 0 };
     for (i32 _yname = 0, _yyname = (_ybase); _yname < TTM_SIZE; _yname++,_yyname++)\
         for (i32 _xname = 0, _xxname = (_xbase); _xname < TTM_SIZE; _xname++,_xxname++)\
 
-struct Tetromino {
+struct gamepiece {
     enum Tile color;
     u16 rotations[4];
 };
 
-#define NUM_TETROMINOS 7
-static const struct Tetromino TETROMINOS[NUM_TETROMINOS] = {
+#define NUM_GAME_PIECES 7
+static const struct gamepiece GAME_PIECES[NUM_GAME_PIECES] = {
     {
         // line
         .color = CYAN,
@@ -195,10 +194,10 @@ static struct {
     i32 lines_left;
     bool menu, pause, stopped, destroy, game_over, music;
 
-    const struct Tetromino *next;
+    const struct gamepiece *next;
 
     struct {
-        const struct Tetromino *ttm;
+        const struct gamepiece *ttm;
         u8 r;
         i32 x, y;
         bool done;
@@ -219,7 +218,7 @@ static struct {
 } state;
 
 static void done() {
-    // flash tetromino which was just placed
+    // flash gamepiece which was just placed
     TTM_FOREACH(x, y, xx, yy, state.curr.x, state.curr.y) {
         if (IN_BOARD(xx, yy) &&
             TTM_BLOCK(state.curr.ttm->rotations[state.curr.r], x, y)) {
@@ -265,12 +264,12 @@ static void done() {
         }
     }
 
-    // new tetromino is spawned in update() after destroy
+    // new gamepiece is spawned in update() after destroy
     state.curr.done = true;
 }
 
 static bool try_modify(
-    const struct Tetromino *ttm, u16 tc, i32 xc, i32 yc, u16 tn, i32 xn, i32 yn) {
+    const struct gamepiece *ttm, u16 tc, i32 xc, i32 yc, u16 tn, i32 xn, i32 yn) {
     u8 board[BOARD_HEIGHT][BOARD_WIDTH];
     memcpy(&board, &state.board, sizeof(board));
 
@@ -309,7 +308,7 @@ fail:
 
 static bool spawn() {
     if (state.next == NULL) {
-        state.next = &TETROMINOS[rand() % NUM_TETROMINOS];
+        state.next = &GAME_PIECES[rand() % NUM_GAME_PIECES];
     }
 
     state.curr.ttm = state.next;
@@ -326,7 +325,7 @@ static bool spawn() {
         return false;
     }
 
-    state.next = &TETROMINOS[rand() % NUM_TETROMINOS];
+    state.next = &GAME_PIECES[rand() % NUM_GAME_PIECES];
     return true;
 }
 
@@ -513,7 +512,7 @@ static void step() {
     bool stopped = !move(0, 1);
 
     if (stopped && state.stopped) {
-        // twice stop = end for this tetromino
+        // twice stop = end for this gamepiece
         done();
     }
 
@@ -566,7 +565,7 @@ static void update() {
         }
     }
 
-    // spawn a new tetromino if the current one is done
+    // spawn a new gamepiece if the current one is done
     if (state.curr.done && !spawn()) {
         state.game_over = true;
         return;

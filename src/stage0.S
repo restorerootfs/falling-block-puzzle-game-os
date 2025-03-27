@@ -23,7 +23,7 @@ _start:
 
     sti
 
-    /* should print TETRIS TIME */
+    /* should print FALLING BLOCK PUZZLE GAME TIME */
     movw $welcome_str, %si
     call print
 
@@ -145,7 +145,7 @@ print:
 1:  ret
 
 welcome_str:
-    .asciz "TETRIS TIME\n"
+    .asciz "FALLING BLOCK PUZZLE GAME TIME\n"
 disk_error_str:
     .asciz "DISK ERROR\n"
 
